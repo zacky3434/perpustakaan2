@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Katalog Buku Eksklusif{% endblock %}
+{% block content %}
+{% include "navbar.html" %}
+
+<div class="relative bg-gradient-to-br from-primary/10 via-white to-secondary/10 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 rounded-3xl p-10 mb-12 text-center shadow-sm border border-white/50 dark:border-gray-700 overflow-hidden">
+    <div class="absolute inset-0 bg-grid-slate-100 dark:bg-grid-slate-700/[0.04] bg-[bottom_1px_center] mask-image:linear-gradient(to_bottom,transparent,black)"></div>
+    <div class="relative z-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-4">
+            Eksplorasi Dunia Tanpa Batas
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
+            Temukan koleksi buku terbaik, mulai peminjaman secara instan, dan kelola perpustakaan digital Anda dengan mudah.
+        </p>
+
+        <!-- Search Bar Modern -->
+        <div class="max-w-2xl mx-auto">
+            <form action="{{ url_for('user_dashboard') }}" method="GET" class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400 group-focus-within:text-primary transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <input type="text" name="q" value="{{ search_query }}" class="block w-full pl-12 pr-32 py-4 text-base text-gray-900 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-full border border-gray-200 dark:border-gray-700 focus:ring-4 focus:ring-primary/20 focus:border-primary shadow-xl shadow-gray-200/50 dark:shadow-none transition-all outline-none" placeholder="Cari judul, penulis, atau kategori buku...">
+                <button type="submit" class="absolute right-2 top-2 bottom-2 px-6 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-full hover:shadow-lg hover:opacity-90 transition-all">
+                    Cari Buku
+                </button>
+            </form>
+        </div>
+
+        <!-- Tombol Filter Kategori (BARU) -->
+        <div class="mt-6 flex flex-wrap justify-center gap-2">
+            <a href="{{ url_for('user_dashboard') }}" class="px-4 py-2 rounded-full text-sm font-bold transition {% if not current_cat %} bg-gray-800 text-white {% else %} bg-white/50 text-gray-700 hover:bg-white border border-gray-200 {% endif %}">Semua Buku</a>
+
+            {% for cat in categories %}
+            <a href="{{ url_for('user_dashboard', cat=cat.id) }}" class="px-4 py-2 rounded-full text-sm font-bold transition {% if current_cat == cat.id|string %} bg-primary text-white shadow-lg {% else %} bg-white/50 text-gray-700 hover:bg-white border border-gray-200 {% endif %}">
+                {{ cat.name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    {% for book in books %}
+    <a href="{{ url_for('book_detail', id=book.id) }}" class="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col">
+
+        <div class="h-56 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 relative flex items-center justify-center p-6">
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 bg-black/10 dark:bg-black/30 transition-opacity duration-300"></div>
+            <!-- Dummy Cover -->
+            <div class="w-32 h-44 bg-white dark:bg-gray-600 rounded shadow-md border-l-4 border-primary flex items-center p-2 text-center overflow-hidden z-10 group-hover:scale-105 transition-transform duration-300">
+                <span class="text-xs font-bold text-gray-700 dark:text-gray-200 uppercase line-clamp-4">{{ book.title }}</span>
+            </div>
+        </div>
+
+        <div class="p-6 flex flex-col flex-grow">
+            <span class="text-[10px] font-extrabold text-secondary tracking-widest uppercase mb-2">{{ book.category_name }}</span>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1 line-clamp-1 group-hover:text-primary transition-colors">{{ book.title }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ book.author }}</p>
+
+            <div class="mt-auto flex justify-between items-center">
+                {% if book.is_available %}
+                    <span class="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Tersedia
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Dipinjam
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </a>
+    {% else %}
+    <div class="col-span-full flex flex-col items-center justify-center py-20 opacity-50">
+        <span class="text-6xl mb-4">📚</span>
+        <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Tidak Ada Buku</h3>
+        <p class="text-gray-500">Katalog kosong atau pencarian tidak ditemukan.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

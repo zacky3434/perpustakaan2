@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Dasbor Admin{% endblock %}
+
+{% block content %}
+{% include "navbar.html" %}
+
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Dasbor Administrator</h1>
+        <p class="text-gray-500">Ringkasan perpustakaan dan kelola katalog buku.</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+    <div class="bg-gradient-to-br from-blue-500 to-primary text-white p-8 rounded-3xl shadow-lg relative overflow-hidden">
+        <div class="absolute -right-4 -bottom-4 text-white/20 text-8xl">📚</div>
+        <h3 class="text-lg font-medium opacity-90 relative z-10">Total Koleksi Buku</h3>
+        <p class="text-5xl font-extrabold mt-2 relative z-10">{{ total_books }}</p>
+    </div>
+    <div class="bg-gradient-to-br from-purple-500 to-secondary text-white p-8 rounded-3xl shadow-lg relative overflow-hidden">
+        <div class="absolute -right-4 -bottom-4 text-white/20 text-8xl">👥</div>
+        <h3 class="text-lg font-medium opacity-90 relative z-10">Total Pengunjung</h3>
+        <p class="text-5xl font-extrabold mt-2 relative z-10">{{ total_users }}</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-sm border border-orange-200 dark:border-gray-700 relative overflow-hidden">
+        <h3 class="text-lg font-medium text-gray-600 dark:text-gray-400">Menunggu Tindakan</h3>
+        <p class="text-5xl font-extrabold mt-2 text-orange-500">{{ pending_req }}</p>
+        <a href="{{ url_for('admin_borrowings') }}" class="mt-4 inline-block text-sm text-primary hover:underline font-medium">Lihat Transaksi →</a>
+    </div>
+</div>
+
+<!-- Tabel Manajemen Buku -->
+<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-white">Manajemen Katalog</h2>
+        <button onclick="document.getElementById('modalTambah').classList.remove('hidden')" class="bg-gradient-to-r from-primary to-secondary text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:shadow-lg transition">
+            + Tambah Buku
+        </button>
+    </div>
+
+    <div class="overflow-x-auto p-4">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="text-gray-500 dark:text-gray-400 text-sm border-b dark:border-gray-700">
+                    <th class="pb-3 px-4">Judul & Penulis</th>
+                    <th class="pb-3 px-4">Kategori</th>
+                    <th class="pb-3 px-4">Status</th>
+                    <th class="pb-3 px-4 text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                {% for book in books %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                    <td class="py-4 px-4">
+                        <p class="font-bold text-gray-900 dark:text-white">{{ book.title }}</p>
+                        <p class="text-sm text-gray-500">{{ book.author }}</p>
+                    </td>
+                    <td class="py-4 px-4"><span class="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-xs font-medium">{{ book.category_name }}</span></td>
+                    <td class="py-4 px-4">
+                        {% if book.is_available %}
+                            <span class="text-green-500 font-medium text-sm flex items-center gap-1">🟢 Tersedia</span>
+                        {% else %}
+                            <span class="text-red-500 font-medium text-sm flex items-center gap-1">🔴 Dipinjam</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-4 px-4 text-center">
+                        <a href="{{ url_for('delete_book', id=book.id) }}" onclick="return confirm('Yakin hapus buku ini?')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition font-medium text-sm">Hapus</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Tambah (Sama dengan sebelumnya, tapi desain diperbarui) -->
+<div id="modalTambah" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex justify-center items-center">
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-3xl w-full max-w-md mx-4 shadow-2xl border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold dark:text-white">Buku Baru</h3>
+            <button onclick="document.getElementById('modalTambah').classList.add('hidden')" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+        </div>
+        <form action="{{ url_for('add_book') }}" method="POST" class="space-y-4">
+            <input type="text" name="title" placeholder="Judul Buku" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary outline-none">
+            <input type="text" name="author" placeholder="Nama Penulis" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary outline-none">
+            <select name="category_id" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary outline-none">
+                <option value="" disabled selected>Pilih Kategori</option>
+                {% for cat in categories %}<option value="{{ cat.id }}">{{ cat.name }}</option>{% endfor %}
+            </select>
+            <textarea name="description" rows="3" placeholder="Deskripsi Singkat" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-primary outline-none"></textarea>
+            <button type="submit" class="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition shadow-lg mt-2">Simpan ke Katalog</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Kelola Transaksi Peminjaman{% endblock %}
+{% block content %}
+{% include "navbar.html" %}
+
+<div class="mb-8">
+    <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Data Transaksi Peminjaman</h1>
+    <p class="text-gray-500">Persetujuan pinjam dan konfirmasi pengembalian buku.</p>
+</div>
+
+<div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="overflow-x-auto p-2">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-300 text-sm">
+                    <th class="p-4 rounded-tl-2xl">Peminjam</th>
+                    <th class="p-4">Buku</th>
+                    <th class="p-4">Tgl Pengajuan</th>
+                    <th class="p-4">Status</th>
+                    <th class="p-4 rounded-tr-2xl text-center">Aksi Admin</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                {% for t in transactions %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
+                    <td class="p-4 font-bold text-gray-800 dark:text-white">{{ t.user_name }}</td>
+                    <td class="p-4 text-primary font-medium">{{ t.book_title }}</td>
+                    <td class="p-4 text-sm text-gray-500">{{ t.request_date[:10] }}</td>
+                    <td class="p-4">
+                        {% if t.status == 'menunggu' %}
+                            <span class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1 rounded-full font-bold">Menunggu Persetujuan</span>
+                        {% elif t.status == 'menunggu pengembalian' %}
+                            <span class="bg-orange-100 text-orange-700 text-xs px-3 py-1 rounded-full font-bold animate-pulse">Meminta Pengembalian</span>
+                        {% elif t.status == 'dipinjam' %}
+                            <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-bold">Sedang Dipinjam</span>
+                        {% elif t.status == 'dikembalikan' %}
+                            <span class="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-bold">Selesai (Masuk Rak)</span>
+                        {% else %}
+                            <span class="bg-red-100 text-red-700 text-xs px-3 py-1 rounded-full font-bold">{{ t.status|title }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="p-4 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            {% if t.status == 'menunggu' %}
+                                <a href="{{ url_for('admin_borrow_action', borrow_id=t.id, action='approve') }}" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow transition">Setujui</a>
+                                <a href="{{ url_for('admin_borrow_action', borrow_id=t.id, action='reject') }}" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow transition">Tolak</a>
+                            {% elif t.status == 'menunggu pengembalian' %}
+                                <a href="{{ url_for('admin_borrow_action', borrow_id=t.id, action='return') }}" class="bg-primary hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold shadow transition">Konfirmasi Buku Diterima</a>
+                            {% else %}
+                                <span class="text-gray-400 text-xs italic">Selesai / Diproses</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

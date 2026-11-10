@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Wishlist Buku Saya{% endblock %}
+{% block content %}
+{% include "navbar.html" %}
+
+<div class="max-w-7xl mx-auto pb-16">
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-[2rem] p-8 text-white mb-10 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-black">❤️ Wishlist Bacaan Saya</h1>
+            <p class="text-blue-100 text-sm mt-1">Daftar buku impian yang ingin Anda baca selanjutnya.</p>
+        </div>
+        <a href="{{ url_for('user_dashboard') }}" class="bg-white text-indigo-700 px-5 py-2.5 rounded-xl text-sm font-bold shadow hover:opacity-90 transition">
+            + Jelajahi Buku Lain
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for book in books %}
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[10px] font-extrabold text-purple-600 uppercase tracking-wider bg-purple-50 dark:bg-purple-900/40 px-3 py-1 rounded-full">{{ book.category_name }}</span>
+                    <span class="text-xs font-bold text-amber-500">⭐ {{ book.avg_rating or 'Baru' }}</span>
+                </div>
+                <a href="{{ url_for('book_detail', id=book.id) }}">
+                    <h3 class="text-lg font-extrabold text-gray-900 dark:text-white hover:text-blue-600 transition">{{ book.title }}</h3>
+                </a>
+                <p class="text-sm text-gray-500 mb-4">{{ book.author }}</p>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between gap-2">
+                <a href="{{ url_for('book_detail', id=book.id) }}" class="flex-1 text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-xl text-xs font-bold hover:opacity-90 transition">
+                    Pinjam Sekarang
+                </a>
+                <form action="{{ url_for('toggle_wishlist', book_id=book.id) }}" method="POST">
+                    <button type="submit" class="px-3 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 text-xs font-bold transition">
+                        Hapus
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full text-center py-20 bg-white dark:bg-gray-800 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
+            <p class="text-5xl mb-3">💜</p>
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white">Wishlist Anda Masih Kosong</h3>
+            <p class="text-sm text-gray-500 mt-1 mb-6">Klik ikon hati pada katalog buku untuk menyimpan buku yang ingin dibaca.</p>
+            <a href="{{ url_for('user_dashboard') }}" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl text-sm font-bold">Lihat Katalog</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
